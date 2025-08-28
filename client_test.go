@@ -119,7 +119,7 @@ func TestBasic(t *testing.T) {
 		t.Fatalf("Second VRFY: expected verification, got %s", err)
 	}
 
-	c.serverName = "smtp.google.com"
+	c.ServerName = "smtp.google.com"
 	if err := c.Auth(sasl.NewPlainClient("", "user", "pass")); err != nil {
 		t.Fatalf("AUTH failed: %s", err)
 	}
@@ -418,7 +418,7 @@ func TestHello(t *testing.T) {
 		fake.ReadWriter = bufio.NewReadWriter(bufio.NewReader(strings.NewReader(server)), bcmdbuf)
 		c := NewClient(fake)
 		defer c.Close()
-		c.serverName = "fake.host"
+		c.ServerName = "fake.host"
 		c.localName = "customhost"
 
 		var err error
@@ -437,7 +437,7 @@ func TestHello(t *testing.T) {
 		case 2:
 			err = c.Verify("test@example.com")
 		case 3:
-			c.serverName = "smtp.google.com"
+			c.ServerName = "smtp.google.com"
 			err = c.Auth(sasl.NewPlainClient("", "user", "pass"))
 		case 4:
 			err = c.Mail("test@example.com", nil)
@@ -525,7 +525,7 @@ func TestHello_421Response(t *testing.T) {
 	fake.ReadWriter = bufio.NewReadWriter(bufio.NewReader(strings.NewReader(server)), bcmdbuf)
 	c := NewClient(fake)
 	defer c.Close()
-	c.serverName = "fake.host"
+	c.ServerName = "fake.host"
 	c.localName = "customhost"
 
 	err := c.Hello("customhost")
@@ -579,7 +579,7 @@ func TestAuthFailed(t *testing.T) {
 	c := NewClient(fake)
 	defer c.Close()
 
-	c.serverName = "smtp.google.com"
+	c.ServerName = "smtp.google.com"
 	err := c.Auth(sasl.NewPlainClient("", "user", "pass"))
 
 	if err == nil {

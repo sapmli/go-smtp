@@ -26,7 +26,6 @@ type Client struct {
 	// connection later
 	conn       net.Conn
 	text       *textproto.Conn
-	serverName string
 	lmtp       bool
 	ext        map[string]string // supported extensions
 	localName  string            // the name to use in HELO/EHLO/LHLO
@@ -36,6 +35,8 @@ type Client struct {
 	helloError error             // the error from the hello
 	rcpts      []string          // recipients accumulated for the current session
 
+	// to validate TLS certificate hostnames
+	ServerName string
 	// Time to wait for command responses (this includes 3xx reply to DATA).
 	CommandTimeout time.Duration
 	// Time to wait for responses after final dot.
@@ -60,7 +61,7 @@ func Dial(addr string) (*Client, error) {
 		return nil, err
 	}
 	client := NewClient(conn)
-	client.serverName, _, _ = net.SplitHostPort(addr)
+	client.ServerName, _, _ = net.SplitHostPort(addr)
 	return client, nil
 }
 
@@ -78,7 +79,7 @@ func DialTLS(addr string, tlsConfig *tls.Config) (*Client, error) {
 		return nil, err
 	}
 	client := NewClient(conn)
-	client.serverName, _, _ = net.SplitHostPort(addr)
+	client.ServerName, _, _ = net.SplitHostPort(addr)
 	return client, nil
 }
 
@@ -319,10 +320,10 @@ func (c *Client) startTLS(config *tls.Config) error {
 	if config == nil {
 		config = &tls.Config{}
 	}
-	if config.ServerName == "" && c.serverName != "" {
+	if config.ServerName == "" && c.ServerName != "" {
 		// Make a copy to avoid polluting argument
 		config = config.Clone()
-		config.ServerName = c.serverName
+		config.ServerName = c.ServerName
 	}
 	if testHookStartTLS != nil {
 		testHookStartTLS(config)
